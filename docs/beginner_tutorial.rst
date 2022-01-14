@@ -21,7 +21,7 @@ Satisfaction versus Optimisation
 
 A **constraint satisfaction problem (CSP)** consists of a set of variables and constraints stablishing relationships between them. Each variable has a finite of possible values (its domain). The goal is to assign values to the variables in its domains satisfying all the constraints. 
 
-A more general version, called **constraint optimization programming (C0P)**, finds amongst all the feasible solutions the one that optimizes some measure, called 'objective function'.
+A more general version, called **constraint optimization programming (COP)**, finds amongst all the feasible solutions the one that optimizes some measure, called 'objective function'.
 
 The state-of-the-art CP solvers can perform both very efficiently, so it is up to you to decide wether you have a satisfaction or an optimisation problem.
 
