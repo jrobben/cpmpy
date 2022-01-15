@@ -83,7 +83,7 @@ import copy
 import math
 import numpy as np
 from ..expressions.core import *
-from ..expressions.variables import _NumVarImpl, _IntVarImpl, _BoolVarImpl, NegBoolView
+from ..expressions.variables import _NumVarImpl, _IntVarImpl, _BoolVarImpl, NegBoolView, _IntervalVarImpl
 from ..expressions.utils import is_num, is_any_list
 
 from itertools import cycle
@@ -127,6 +127,8 @@ def flatten_constraint(expr):
     """
     # base cases
     if isinstance(expr, _BoolVarImpl) or isinstance(expr, bool):
+        return [expr]
+    if isinstance(expr, _IntervalVarImpl):
         return [expr]
     elif is_num(expr) or isinstance(expr, _NumVarImpl):
         raise Exception("Numeric constants or numeric variables not allowed as base constraint")
@@ -290,7 +292,7 @@ def flatten_objective(expr):
 def __is_flat_var(arg):
     """ True if the variable is a numeric constant, or a _NumVarImpl (incl subclasses)
     """
-    return is_num(arg) or isinstance(arg, _NumVarImpl)
+    return is_num(arg) or isinstance(arg, _NumVarImpl) or isinstance(arg, _IntervalVarImpl)
 
 def __is_flat_var_or_list(arg):
     """ True if the variable is a numeric constant, or a _NumVarImpl (incl subclasses)

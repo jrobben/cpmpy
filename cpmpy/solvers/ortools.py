@@ -19,7 +19,7 @@ import sys # for stdout checking
 
 from .solver_interface import SolverInterface, SolverStatus, ExitStatus
 from ..expressions.core import Expression, Comparison, Operator
-from ..expressions.variables import _NumVarImpl, _IntVarImpl, _BoolVarImpl, NegBoolView
+from ..expressions.variables import _NumVarImpl, _IntVarImpl, _BoolVarImpl, NegBoolView, _IntervalVarImpl
 from ..expressions.utils import is_num, is_any_list
 from ..transformations.get_variables import get_variables_model, get_variables
 from ..transformations.flatten_model import flatten_model, flatten_constraint, flatten_objective, get_or_make_var, negated_normal
@@ -370,10 +370,20 @@ class CPM_ortools(SolverInterface):
 
         Typically only needed for internal use
         """
+        def _create_int_var(cpm_var):
+            if isinstance(cpm_var, _IntVarImpl):
+                return self.ort_model.NewIntVar(cpm_var.lb, cpm_var.ub, str(cpm_var))
+            return cpm_var
+
         if isinstance(cpm_var, _BoolVarImpl):
             revar = self.ort_model.NewBoolVar(str(cpm_var))
+        if isinstance(cpm_var, _IntervalVarImpl):
+            revar = self.ort_model.NewIntervalVar(start=_create_int_var(cpm_var.start),
+                                                  size=_create_int_var(cpm_var.size),
+                                                  end=_create_int_var(cpm_var.end),
+                                                  name=str(cpm_var))
         elif isinstance(cpm_var, _IntVarImpl):
-            revar = self.ort_model.NewIntVar(cpm_var.lb, cpm_var.ub, str(cpm_var))
+            revar = _create_int_var(cpm_var)
         self.varmap[cpm_var] = revar
 
 
@@ -526,7 +536,9 @@ class CPM_ortools(SolverInterface):
             args = [self.ort_var_or_list(v) for v in cpm_expr.args]
 
             if cpm_expr.name == 'alldifferent':
-                return self.ort_model.AddAllDifferent(args) 
+                return self.ort_model.AddAllDifferent(args)
+            if cpm_expr.name == 'nooverlap':
+                return self.ort_model.AddNoOverlap(args)
             elif cpm_expr.name == 'table':
                 assert(len(args) == 2) # args = [array, table]
                 return self.ort_model.AddAllowedAssignments(args[0], args[1])
@@ -566,6 +578,8 @@ class CPM_ortools(SolverInterface):
         if isinstance(cpm_var, NegBoolView):
             return self.varmap[cpm_var._bv].Not()
         elif isinstance(cpm_var, _NumVarImpl): # _BoolVarImpl is subclass of _NumVarImpl
+            return self.varmap[cpm_var]
+        elif isinstance(cpm_var, _IntervalVarImpl):
             return self.varmap[cpm_var]
 
         raise NotImplementedError("Not a know var {}".format(cpm_var))

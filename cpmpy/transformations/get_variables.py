@@ -5,7 +5,7 @@ Variables are ordered by appearance, e.g. first encountered first
 """
 import warnings # for deprecation warning
 from ..expressions.core import Expression
-from ..expressions.variables import _NumVarImpl,NegBoolView
+from ..expressions.variables import _NumVarImpl, NegBoolView, _IntervalVarImpl
 from ..expressions.utils import is_any_list
 
 def get_variables_model(model):
@@ -34,8 +34,12 @@ def get_variables(expr):
     if isinstance(expr, NegBoolView):
         # this is just a view, return the actual variable
         return [expr._bv]
-        
+
     if isinstance(expr, _NumVarImpl):
+        # a real var, do our thing
+        return [expr]
+
+    if isinstance(expr, _IntervalVarImpl):
         # a real var, do our thing
         return [expr]
 

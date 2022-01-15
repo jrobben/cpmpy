@@ -204,6 +204,42 @@ def cpm_array(arr):
     return NDVarArray(shape=arr.shape, dtype=type(arr.flat[0]), buffer=arr)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def intervalvar(start, size, end, name=None):
+    """ Create and interval variable
+
+    :start The start of the interval, constant or intvar
+    :size The size of the interval, constant or intvar
+    :end The end of the interval, constant or intvar
+    """
+    return _IntervalVarImpl(start, size, end, name=name)
+
+
+
+
+
+
+
+
+
+
+
+
 class NullShapeError(Exception):
     def __init__(self, shape, message="Shape should be non-zero"):
         self.shape = shape
@@ -497,6 +533,55 @@ class NDVarArray(Expression, np.ndarray):
 
     # TODO?
     #object.__matmul__(self, other)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class _IntervalVarImpl(Expression):
+    """
+    **Interval** constraint variable with given lowerbound and upperbounds for start and end and an interval size.
+
+    Do not create this object directly, use `intervalvar()` instead
+    """
+    counter = 0
+
+    def __init__(self, start, size, end, name=None):
+        if name is None:
+            name = "IntervalV{}".format(_IntervalVarImpl.counter)
+            _IntervalVarImpl.counter = _IntervalVarImpl.counter + 1 # static counter
+        self.start = start
+        self.end = end
+        self.size = size
+        self.name = name
+
+    def is_bool(self):
+        """ is it a Boolean (return type) Operator?
+        """
+        return False
+
+    def __repr__(self):
+        return self.name
+
+    def __hash__(self):
+        return hash(str(self))
+
 
 
 def _genname(basename, idxs):

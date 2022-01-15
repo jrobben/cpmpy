@@ -270,3 +270,11 @@ class Element(GlobalConstraint):
     def __repr__(self):
         return "{}[{}]".format(self.args[0], self.args[1])
 
+class NoOverlap(GlobalConstraint):
+    """All given intervals do not overlap
+    """
+    def __init__(self, *args):
+        super().__init__("nooverlap", flatlist(args))
+
+
+
